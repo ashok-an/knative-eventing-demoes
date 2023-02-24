@@ -1,0 +1,129 @@
+# Namespace for sample application with eventing enabled
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-demo
+  labels:
+       eventing.knative.dev/injection: enabled
+
+---
+# A default broker
+apiVersion: eventing.knative.dev/v1
+kind: Broker
+metadata:
+  name: default
+  namespace: knative-demo
+  annotations:
+    # Note: you can set the eventing.knative.dev/broker.class annotation to change the class of the broker.
+    # The default broker class is MTChannelBasedBroker, but Knative also supports use of the other class.
+    eventing.knative.dev/broker.class: MTChannelBasedBroker
+spec: {}
+---
+# Helloworld-python app deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ce-python
+  namespace: knative-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: ce-python
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+        - name: ce-python
+          image: ashoka007/python-ce-emitter:0.12
+          imagePullPolicy: Always
+
+---
+# Service that exposes ce-python app.
+# This will be the subscriber for the Trigger
+apiVersion: v1
+kind: Service
+metadata:
+  name: ce-python
+  namespace: knative-demo
+spec:
+  selector:
+    app: ce-python
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+
+---
+# Knative Eventing Trigger to trigger the ce-python service
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: ce-python
+  namespace: knative-demo
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: dev.knative.events.demo01
+      source: ashoka007/knative-events/demo01
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: ce-python
+
+---
+# event-display app deploment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-display
+  namespace: knative-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app: event-display
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      containers:
+        - name: helloworld-python
+          image: gcr.io/knative-releases/knative.dev/eventing/cmd/event_display
+
+---
+# Service that exposes event-display app.
+# This will be the subscriber for the Trigger
+kind: Service
+apiVersion: v1
+metadata:
+  name: event-display
+  namespace: knative-demo
+spec:
+  selector:
+    app: event-display
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
+---
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: event-display
+  namespace: knative-demo
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: dev.knative.events.demo01
+      source: ashoka007/knative-events/demo01
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: event-display

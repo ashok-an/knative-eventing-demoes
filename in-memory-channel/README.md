@@ -1,110 +1,59 @@
-# knative-eventing-demoes
-Example demoes for knative
+# Copied and modified from https://github.com/knative/docs/tree/main/code-samples/eventing/helloworld/helloworld-python#hello-world---python
 
-Inspired by https://github.com/matzew/knative-broker-box
-
-# Steps
-1. Install knative eventing
 ```sh
-> ./01-install-eventing.sh
-...
+> ./example.sh
+>>> Applying yamls ...
+namespace/knative-demo unchanged
+broker.eventing.knative.dev/default unchanged
+deployment.apps/ce-python unchanged
+service/ce-python unchanged
+trigger.eventing.knative.dev/ce-python unchanged
+deployment.apps/event-display unchanged
+service/event-display unchanged
+trigger.eventing.knative.dev/event-display unchanged
 
-wait and check
+>>> Pod status ...
+NAME                             READY   STATUS    RESTARTS   AGE
+ce-python-768dd48d9-w9bbx        1/1     Running   0          9m48s
+event-display-7b5f9f878f-7bcjw   1/1     Running   0          62m
+Forwarding from 0.0.0.0:8080 -> 8080
 
-NAME                                   READY   STATUS    RESTARTS   AGE
-eventing-controller-579b79f84d-k5bnc   1/1     Running   0          65s
-eventing-webhook-d758cd958-lb7lg       1/1     Running   0          65s
-imc-controller-65cc5967b7-mtqkg        1/1     Running   0          63s
-imc-dispatcher-7cfbb76866-t76pv        1/1     Running   0          63s
-mt-broker-controller-85d688f47-7qrp9   1/1     Running   0          61s
-mt-broker-filter-559869b768-nnht6      1/1     Running   0          61s
-mt-broker-ingress-795f6cd64c-b2fkp     1/1     Running   0          61s
-```
+>>> Waiting for 20 sec
+>>> Sending: test message - sent at Fri Feb 24 21:07:17 IST 2023 ...
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /knative-demo/default HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.86.0
+> Accept: */*
+> Ce-Id: abcd-1234-19652-14058
+> Ce-specversion: 0.3
+> Ce-Type: dev.knative.events.demo01
+> Ce-Source: ashoka007/knative-events/demo01
+> Content-Type: application/json
+> Content-Length: 62
+>Handling connection for 8080
 
-2. API server event source
-```sh
-> ./02-apiserversource.sh
-...
-NAME                                                              READY   STATUS    RESTARTS   AGE
-apiserversource-api-events-54651155-0d05-49cd-a041-0388a56rd84t   1/1     Running   0          106s
-event-display-dep-54c498f975-2555g                                1/1     Running   0          107s
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 202 Accepted
+< Allow: POST, OPTIONS
+< Date: Fri, 24 Feb 2023 15:37:17 GMT
+< Content-Length: 0
+<
+* Connection #0 to host localhost left intact
 
-To test, run
-- kubectl run testpod --image=nginx --restart=Never -n api-src-demo
-- kubectl delete pod/testpod -n api-src-demo
-- kubectl logs -l app=event-display -n api-src-demo
-
-# Check the logs
-> kubectl logs -l app=event-display -n api-src-demo --tail=15
-      ],
-      "name": "testpod.17467ec2dae18745",
-      "namespace": "api-src-demo",
-      "resourceVersion": "3784",
-      "uid": "65030fe2-2bb8-49ca-a5b5-4f4376ffa7f5"
-    },
-    "reason": "Killing",
-    "reportingComponent": "",
-    "reportingInstance": "",
-    "source": {
-      "component": "kubelet",
-      "host": "macbook-worker2"
-    },
-    "type": "Normal"
-  }
-```
-
-3. Ping source - for crontab related usecases
-```sh
-> ./03-pingsource.sh
-...
-NAME                                 READY   STATUS    RESTARTS   AGE
-event-display-dep-54c498f975-dmjtw   1/1     Running   0          108s
-
-To test run,
-kubectl logs -l app=event-display -n ping-src-demo
-
-> kubectl logs -l app=event-display -n ping-src-demo
-  {"message": "lorem ipsum ...", "key": 12345 }
-☁️  cloudevents.Event
-Context Attributes,
-  specversion: 1.0
-  type: dev.knative.sources.ping
-  source: /apis/v1/namespaces/ping-src-demo/pingsources/ping-events
-  id: f29f0cbc-dcef-4361-b68c-7db2275b158a
-  time: 2023-02-23T15:55:00.082689754Z
+>>> Logs from event-display:
+  id: c3d72424-3162-45b8-abe4-783718a99939
+  datacontenttype: application/json
+Extensions,
+  knativearrivaltime: 2023-02-24T15:37:19.776520968Z
 Data,
-  {"message": "lorem ipsum ...", "key": 12345 }
+  {
+  "fake.email": "ihoffman@example.net",
+  "fake.name": "Rachel Robinson",
+  "fake.url": "http://www.richardson-sullivan.net/",
+  "input.msg": "b'{\\n  \"fake.email\": \"christopherjoseph@example.net\",\\n  \"fake.name\": \"Timothy Wise\",\\n  \"fake.url\": \"https://meyers-robbins.com/\",\\n  \"input.msg\": \"b\\'{\\\\\\\\n  \\\\\"fake.email\\\\\": \\\\\"aaron97@example.org\\\\\",\\\\\\\\n  \\\\\"fake.name\\\\\": \\\\\"Monica Cowan\\\\\",\\\\\\\\n  \\\\\"fake.url\\\\\": \\\\\"https://www.anderson.info/\\\\\",\\\\\\\\n  \\\\\"input.msg\\\\\": \\\\\"b\\\\\\\\\\'{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n  \\\\\\\\\\\\\\\\\\\\\"fake.email\\\\\\\\\\\\\\\\\\\\\": \\\\\\\\\\\\\\\\\\\\\"hhancock@example.org\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n  \\\\\\\\\\\\\\\\\\\\\"fake.name\\\\\\\\\\\\\\\\\\\\\": \\\\\\\\\\\\\\\\\\\\\"Kendra Reynolds\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n  \\\\\\\\\\\\\\\\\\\\\"fake.url\\\\\\\\\\\\\\\\\\\\\": \\\\\\\\\\\\\\\\\\\\\"https://alexander.com/\\\\\\\\\\\\\\\\
+./example.sh: line 37: 20173 Terminated: 15          kubectl port-forward -n knative-eventing svc/broker-ingress --address=0.0.0.0 8080:80
+
 ```
-
-4. Install kafka in the cluster
-```sh
-> ./04-install-kafka-cluster.sh
-Credit:
-Credit: Copied from https://github.com/matzew/knative-broker-box/blob/main/01-strimzi.sh
-Credit:
-Using Strimzi Version:                  0.33.0
-Strimzi install
-...
-
-# Verfiy
-> kubectl get pod -n kafka
-NAME                                        READY   STATUS    RESTARTS   AGE
-my-cluster-kafka-0                          1/1     Running   0          8m52s
-my-cluster-zookeeper-0                      1/1     Running   0          21m
-strimzi-cluster-operator-6b47f54c84-qt7qf   1/1     Running   0          31m
-```
-
-5. Install kafka-broker and related entities
-```sh
-> ./05-install-kafka-eventing.sh
-...
-wait and check
-
-kafka-broker-dispatcher-68b8d895bd-ddp9m   0/1     ContainerCreating   0          11s
-kafka-broker-receiver-6fc8ddb76f-v9bcn     0/1     ContainerCreating   0          11s
-kafka-channel-dispatcher-ddc768ff-7wcp9    0/1     ContainerCreating   0          13s
-kafka-channel-receiver-597dfd8466-4b46c    0/1     ContainerCreating   0          13s
-kafka-controller-6598bf554-nzfgv           0/1     ContainerCreating   0          15s
-kafka-sink-receiver-5697c56cb9-plk6c       0/1     ContainerCreating   0          10s
-kafka-webhook-eventing-5bc696f758-f7kfr    0/1     ContainerCreating   0          15s
-``` 
