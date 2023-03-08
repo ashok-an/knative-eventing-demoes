@@ -20,13 +20,12 @@ strimzi_version="0.33.0"
 function header_text {
   echo "$header$*$reset"
 }
-
 header_text "Credit:"
 header_text "Credit: Copied from https://github.com/matzew/knative-broker-box/blob/main/01-strimzi.sh"
 header_text "Credit:"
 header_text "Using Strimzi Version:                  ${strimzi_version}"
 
-header_text "Strimzi install"
+header_text "Strimzi install ..."
 kubectl create namespace kafka
 curl -L "https://github.com/strimzi/strimzi-kafka-operator/releases/download/${strimzi_version}/strimzi-cluster-operator-${strimzi_version}.yaml" \
   | sed 's/namespace: .*/namespace: kafka/' \
@@ -86,5 +85,3 @@ EOF
 
 header_text "Waiting for Strimzi to become ready"
 kubectl wait kafka --all --timeout=-1s --for=condition=Ready -n kafka
-sleep 5
-kubectl get pods -n kafka
