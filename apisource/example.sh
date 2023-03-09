@@ -6,6 +6,7 @@ echo "Preparing env ..."
 kubectl create ns $ns
 kubectl create sa ${ns}-sa -n $ns
 
+echo "Using namespace:${ns}"
 cat <<-EOF | kubectl apply -f -
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -113,10 +114,11 @@ kn source apiserver create ${source} \
 
 echo
 sleep 10
+
+echo "Running tests ..."
 kubectl get pods -n ${ns}
-echo
-echo "To test, run
-- kubectl run testpod --image=nginx --restart=Never -n ${ns}
-- kubectl delete pod/testpod -n ${ns}
-- kubectl logs -l app=event-display -n ${ns}"
+kubectl run testpod --image=nginx --restart=Never -n ${ns}
+kubectl delete pod/testpod -n ${ns} --force
+kubectl logs -l app=event-display -n ${ns} --tail=100 | egrep -i "\"message\"|kind\"|name\"|namespace\"|operation\""
+
 
