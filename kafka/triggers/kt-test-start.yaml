@@ -1,0 +1,18 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  labels:
+    eventing.knative.dev/broker: kb-test
+  name: kt-test-start
+  namespace: kafka-ns
+spec:
+  broker: kb-test
+  filter:
+    attributes:
+      buildstatus: pass
+  subscriber:
+    ref:
+      apiVersion: flows.knative.dev/v1
+      kind: Sequence
+      name: test-ms
+      namespace: default

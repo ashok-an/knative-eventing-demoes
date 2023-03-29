@@ -1,0 +1,27 @@
+apiVersion: flows.knative.dev/v1
+kind: Sequence
+metadata:
+  name: test-ms
+spec:
+  channelTemplate:
+    apiVersion: messaging.knative.dev/v1
+    kind: InMemoryChannel
+  steps:
+    - ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: create-tb-ms
+    - ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: run-tests-ms
+    - ref:
+        apiVersion: serving.knative.dev/v1
+        kind: Service
+        name: clean-tb-ms
+  reply:
+    ref:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: KafkaSink
+      name: ksink-test-done
+      namespace: kafka-ns

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="v1.9.2"
+version="v1.9.3"
 echo
 echo "Creating kafka knative-eventing resources "
 for i in $(seq 1 2); do

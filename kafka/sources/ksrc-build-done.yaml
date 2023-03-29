@@ -1,0 +1,22 @@
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: ks-build-done
+  namespace: kafka-ns
+spec:
+  ceOverrides:
+    extensions:
+      buildstatus: pass
+  consumerGroup: knative-consumer-group
+  bootstrapServers:
+  - 173.39.62.80:9092 # note the kafka namespace
+  topics:
+  - kn.build.pass
+  sink:
+    #uri: https://webhook.site/4ddea95c-e350-4b6a-9464-ca069b999df4
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: kb-test
+      namespace: kafka-ns
+

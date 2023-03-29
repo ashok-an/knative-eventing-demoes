@@ -1,0 +1,10 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: KafkaSink
+metadata:
+  name: ksink-test-done
+  namespace: kafka-ns
+spec:
+  topic: kn.test.pass
+  bootstrapServers:
+   - 173.39.62.80:9092
+
